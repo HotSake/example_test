@@ -63,4 +63,7 @@ ActorAI:loadDefinition("/engine/ai/")
 -- Birther descriptor
 Birther:loadDefinition("/data/birth/descriptors.lua")
 
+-- Additional entities resolvers
+dofile("/mod/resolvers.lua")
+
 return {require "mod.class.Game" }

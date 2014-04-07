@@ -26,7 +26,7 @@ newBirthDescriptor{
 
 	copy = {
 		max_level = 10,
-		lite = 4,
+		lite = 50,
 		max_life = 25,
 	},
 	body = { INVEN = 10, MAIN_HAND = 1, OFF_HAND = 1, ARMOR = 1},

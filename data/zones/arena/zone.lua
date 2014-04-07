@@ -18,18 +18,16 @@
 -- darkgod@te4.org
 
 return {
-	name = "Old ruins",
+	name = "Test Arena",
 	level_range = {1, 1},
-	max_level = 10,
+	max_level = 99,
 	decay = {300, 800},
-	width = 50, height = 50,
-	persistent = "zone",
+	width = 25, height = 25,
+	all_remembered = true,
+	all_lited = true,
 	generator =  {
 		map = {
-			class = "engine.generator.map.Roomer",
-			nb_rooms = 10,
-			rooms = {"simple", "pillar"},
-			lite_room_chance = 100,
+			class = "engine.generator.map.Empty",
 			['.'] = "FLOOR",
 			['#'] = "WALL",
 			up = "UP",
@@ -38,13 +36,9 @@ return {
 		},
 		actor = {
 			class = "engine.generator.actor.Random",
-			nb_npc = {20, 30},
---			guardian = "SHADE_OF_ANGMAR", -- The guardian is set in the static map
+			nb_npc = {1, 1},
 		},
-		object = {
-            class = "engine.generator.object.Random",
-            nb_object = {20, 30},
-        },
+		object = {},
 	},
 	levels =
 	{
