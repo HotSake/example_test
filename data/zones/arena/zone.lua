@@ -27,7 +27,7 @@ return {
 	all_lited = true,
 	generator =  {
 		map = {
-			class = "engine.generator.map.Empty",
+			class = "mod.class.generator.map.Empty",
 			['.'] = "FLOOR",
 			['#'] = "WALL",
 			up = "UP",
@@ -35,8 +35,14 @@ return {
 			door = "DOOR",
 		},
 		actor = {
-			class = "engine.generator.actor.Random",
+			class = "mod.class.generator.actor.snake",
 			nb_npc = {1, 1},
+			nb_snakes = {1, 1},
+			snakeData = {
+				snakeList = {"simpleSnakeHead"},
+				length = rng.range(3,9),
+				canShort = false,
+			},
 		},
 		object = {},
 	},

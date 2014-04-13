@@ -1,6 +1,5 @@
 local Talents = require "engine.interface.ActorTalents"
 
--- ??? TODO: Move all this into a custom Generator instead of a resolver, since it's performing the work of one anyway.
 function resolvers.buildSnake(body, tail, canShort)
 	return {__resolver="buildSnake", __resolve_last = true, body = body, tail = tail, canShort = canShort or false}
 end
@@ -23,54 +22,6 @@ function resolvers.calc.buildSnake(t, e)
 		print("buildSnake: Invalid body or tail name")
 		return nil -- Fail somehow so it doesn't spawn a head?
 	end
----[[
-	-- Time to do work!
-	-- First, use the length of the snake to draw out an accessible path for its body by random walk. Will only fail it paints itself into a corner.
-	-- If it fails to place after a set number of attempts, then fail spawning.
-	local snakePath = {}
-	local bestPath = {}
-	local maxTries = 10
-
-	-- ??? Entity does not have x,y coords while resolving, because it resolves before it is placed on the map! FIGURE IT OUT!
-	-- See TOME resolvers.sustainsAtBirth - build the tail in an e.on_added function
-	-- See entity "on_added_to_level" and Actor:addedToLevel
-	-- See "make_escort"
-	return nil
-
-	for pathTries = 1, maxTries do
-		snakePath = {{e.x, e.y}}
-
-		for i = 2, e.length do -- Planning each part
-			local adjCoords = table.shuffle(util.adjacentCoords(snakePath[#snakePath][1], snakePath[#snakePath][2]))
-
-			-- Iterate over randomized adjacent coordinates, checking if they're open and not part of the path.
-			for _, tryCoord in pairs(adjCoords) do
-				-- Check tryCoord for obstruction or path part
-				--if coordTestStuff then -- ??? Testing functions
-					snakePath[i] = tryCoord -- Add tryCoord to path
-					break -- Stop checking adjacent coords
-				--end
-			end
-
-			if #snakePath ~= i then -- Failed to find an open space (i is the number of the new coord. If we found an open space, then there would be i entries in snakePath)
-				break
-			end
-		end
-
-		if #snakePath ~= e.length then -- try must have failed. Keep longest path and try again
-			if #snakePath > #bestPath then bestPath = snakePath end -- Save longest path in case we can fall short
-			pathTries = pathTries + 1
-		else -- snakePath complete. Break the while loop and move on
-			print("Found complete snake path in "..pathTries.." tries")
-			bestPath = snakePath
-			break
-		end
-	end
-	
-	-- ??? DEBUG
-	game.log("snakePath: %s; bestPath: %s", #snakePath, #bestPath)
-	return nil
---]]
 --[[
 	-- Check for complete path first
 	if canShort ~= true and #snakePath ~= e.length then -- failed
