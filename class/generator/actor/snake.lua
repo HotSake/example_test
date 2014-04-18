@@ -108,10 +108,10 @@ function _M:placeSnake(snakePath, snakeType)
 	local snakeType = snakeType
 	local snakePartList = {}
 
-	local m = self.zone:makeEntityByName(self.level, "actor", snakeType)
-	snakePartList[1] = m
+	local m = self.zone:makeEntityByName(self.level, "actor", snakeType) -- Make the head first
+	snakePartList[1] = m -- Keep a list of all actors comprising the snake
 	table.insert(m.snakeData,{["head"]=snakePartList[1]}) -- Tell the head who the head is
-	local bodies = m.allowedParts.body
+	local bodies = m.allowedParts.body -- Head defs contain lists of allowed parts
 	local tails = m.allowedParts.tail
 
 	--[[ Debug stuff
@@ -138,6 +138,9 @@ function _M:placeSnake(snakePath, snakeType)
 
 		local m = self.zone:makeEntityByName(self.level, "actor", body)
 		if not m then print("Failed to makeEntityByName: "..body) return end
+		if self.data.snakeData.headOnly = true then -- headOnly means that the snake parts are not presented to the player as units. Their names and tooltips reflect the head's.
+			m.name = snakePartList[1].name -- Copy the head's name
+		end
 		snakePartList[i] = m
 		table.insert(m.snakeData,{["head"]=snakePartList[1]}) -- Tell this part who the head is
 		table.insert(m.snakeData,{["up"]=snakePartList[i-1]}) -- Tell this part who its neighbor toward the head is

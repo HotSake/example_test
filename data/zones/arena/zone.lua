@@ -42,6 +42,7 @@ return {
 				snakeList = {"simpleSnakeHead"},
 				length = rng.range(3,9),
 				canShort = false,
+				headOnly = false,
 			},
 		},
 		object = {},
