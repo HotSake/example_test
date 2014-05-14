@@ -40,7 +40,7 @@ function _M:generate()
 			while used[idx] do s, idx = rng.table(self.spots) end -- If spot is used, get another random spot until you get an unused spot
 			used[idx] = true -- Mark this spot used. Good or bad, we want it invalidated for future spawns
 			snakePath = self:findPath(s, self.data.snakeData.length, maxTries, self.data.snakeData.canShort) -- Get valid snakePath from this spot, or confirmation that it's bad
-			if snakePath[1] then -- good spot
+			if snakePath[1] ~= false then -- good spot
 				goodSpot = true
 				local snakeType = rng.table(self.data.snakeData.snakeList)
 				self:placeSnake(snakePath, snakeType)
@@ -67,7 +67,7 @@ function _M:findPath(s, length, maxTries, canShort)
 	if not x or not y then print("snake.lua:canPlace - Did not find free grid to start around: "..s.x or "missing"..", "..s.y or "missing") return {false} end
 
 	for pathTries = 1, maxTries do
-		snakePath = {{x, y}} -- Start with the starting point. Can always place the head there
+		table.insert(snakePath,{x, y}) -- Start with the starting point. Can always place the head there
 
 		for i = 2, length do -- Planning each part
 			local adjCoords = table.shuffle(util.adjacentCoords(snakePath[#snakePath][1], snakePath[#snakePath][2]))
@@ -76,7 +76,8 @@ function _M:findPath(s, length, maxTries, canShort)
 			for _, tryCoord in pairs(adjCoords) do
 				-- Check tryCoord for obstruction or path part
 				if self:gridClear({x=tryCoord[1],y=tryCoord[2]}) and not self:pathContains(snakePath, tryCoord) then
-					snakePath[i] = tryCoord -- Add tryCoord to path
+					-- TODO: insert check on spaces at adjacent angles to ensure snake isn't crossing itself
+					table.insert(snakePath,tryCoord) -- Add tryCoord to path
 					break -- Stop checking adjacent coords
 				end
 			end
@@ -90,13 +91,16 @@ function _M:findPath(s, length, maxTries, canShort)
 			if #snakePath > #bestPath then bestPath = snakePath end -- Save longest path in case we can fall short
 			pathTries = pathTries + 1
 		else -- snakePath complete. Break the while loop and move on
-			print("Found complete snake path in "..pathTries.." tries")
+			print("Found complete length "..length.." snake path in "..pathTries.." tries")
 			bestPath = snakePath
 			break
 		end
 	end
 
 	if #snakePath == length or canShort == true then -- Either we met the length requirement or we don't care anyway
+		if #snakePath < length then
+			print("Found length "..#snakePath.." path (desired: "..length..") in "..(pathTries-1).." tries.")
+		end
 		return snakePath
 	else
 		return {false} -- generate() will check snakePath[1] to see if good path. Must return a table with at least 1 element
@@ -109,8 +113,8 @@ function _M:placeSnake(snakePath, snakeType)
 	local snakePartList = {}
 
 	local m = self.zone:makeEntityByName(self.level, "actor", snakeType) -- Make the head first
-	snakePartList[1] = m -- Keep a list of all actors comprising the snake
-	table.insert(m.snakeData,{["head"]=snakePartList[1]}) -- Tell the head who the head is
+	table.insert(snakePartList,m) -- Keep a list of all actors comprising the snake
+	m.snakeData["head"]=snakePartList[1] -- Tell the head who the head is
 	local bodies = m.allowedParts.body -- Head defs contain lists of allowed parts
 	local tails = m.allowedParts.tail
 
@@ -138,20 +142,28 @@ function _M:placeSnake(snakePath, snakeType)
 
 		local m = self.zone:makeEntityByName(self.level, "actor", body)
 		if not m then print("Failed to makeEntityByName: "..body) return end
-		if self.data.snakeData.headOnly = true then -- headOnly means that the snake parts are not presented to the player as units. Their names and tooltips reflect the head's.
+		if self.data.snakeData.headOnly == true then -- headOnly means that the snake parts are not presented to the player as units. Their names and tooltips reflect the head's.
 			m.name = snakePartList[1].name -- Copy the head's name
+			-- TODO: alter tooltip code to show head's tooltip instead
+		else
+			if i < #snakePath then
+				m.name = "Segment "..i-1
+			else
+				m.name = "Tail"
+			end
 		end
-		snakePartList[i] = m
-		table.insert(m.snakeData,{["head"]=snakePartList[1]}) -- Tell this part who the head is
-		table.insert(m.snakeData,{["up"]=snakePartList[i-1]}) -- Tell this part who its neighbor toward the head is
-		table.insert(snakePartList[i-1].snakeData,{["down"]=m}) -- Tell this part's up neighbor who its new down neighbor is
+		table.insert(snakePartList,m)
+		m.snakeData["head"]=snakePartList[1] -- Tell this part who the head is
+		m.snakeData["up"]=snakePartList[i-1] -- Tell this part who its neighbor toward the head is
+		snakePartList[i-1].snakeData["down"]=m -- Tell this part's up neighbor who its new down neighbor is
 		self.zone:addEntity(self.level, m, "actor", snakePath[i][1], snakePath[i][2])
 	end
 	--]]
 end
 
 function _M:gridClear(s)
-	if game.level.map:checkEntity(s.x, s.y, game.level.map.TERRAIN, "block_move") or game.level.map(s.x, s.y, Map.ACTOR) then
+	-- Added isBound check to stop tracing paths outside the level
+	if game.level.map:checkEntity(s.x, s.y, game.level.map.TERRAIN, "block_move") or game.level.map(s.x, s.y, Map.ACTOR) or not game.level.map:isBound(s.x, s.y) then
 		return false
 	else
 		return true
@@ -160,9 +172,7 @@ end
 
 function _M:pathContains(path, grid)
 	for _, pathGrid in pairs(path) do
-		if pathGrid[1] == grid[1] and pathGrid[2] == grid[2] then
-			return true
-		end
+		if pathGrid[1] == grid[1] and pathGrid[2] == grid[2] then return true end
 	end
 	return false
 end

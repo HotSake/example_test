@@ -40,7 +40,7 @@ return {
 			nb_snakes = {1, 1},
 			snakeData = {
 				snakeList = {"simpleSnakeHead"},
-				length = rng.range(3,9),
+				length = rng.range(9,9),
 				canShort = false,
 				headOnly = false,
 			},

@@ -19,12 +19,15 @@ function getDebugMenu(id, history)
 	--Submenu for misc stuff, usually one-off tests
 	elseif id == "Misc" then
 		d = chooser.new("Choose option:", {
+			{name="angleTest", desc="Test functions to calculate the interior angle between three points"},
 			{name="classFunc", desc="Test calling class functions on objects that have overridden those functions"},
 			{name="passTable", desc="See if Shibari's initial method of checking Shield functions could work (IRC thing)"},
 			{name="safeCheck", desc="Test different ways of checking or calling bullshit properties to see what crashes and what doesn't"}
 		},
 		function(result) getDebugMenu(result, history.." -> "..result) end)
 	-- Endpoints below here as further elseif lines
+	elseif id == "angleTest" then
+		angleTest()
 	elseif id == "classFunc" then
 		classFunc()
 	elseif id == "passTable" then
@@ -63,4 +66,11 @@ function safeCheck()
 	else
 		game.log("nil value ~= nil")
 	end
+end
+
+function angleTest()
+	local a1 = getAngleFromPoints({x=0,y=0},{x=0,y=1},{x=0,y=-1})
+	local a2 = getAngleFromPoints({x=0,y=0},{x=0,y=1},{x=1,y=0})
+	local a3 = getAngleFromPoints({x=0,y=0},{x=0,y=1},{x=1,y=1})
+	game.log("Angle 1 (should be 180): %s; Angle 2 (should be 90): %s, Angle 3 (should be 45): %s", a1, a2, a3)
 end
